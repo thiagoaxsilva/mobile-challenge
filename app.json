@@ -1,0 +1,11 @@
+{
+  "expo": {
+    "name": "mobile-challenge",
+    "slug": "mobile-challenge",
+    "version": "1.0.0",
+    "assetBundlePatterns": [
+      "**/*"
+    ]
+  },
+  "name": "mobile-challenge"
+}
