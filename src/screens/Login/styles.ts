@@ -1,3 +1,4 @@
+import { TextInput } from "react-native";
 import { RFValue } from "react-native-responsive-fontsize";
 import styled from "styled-components/native";
 
@@ -24,7 +25,7 @@ export const LoginForm = styled.View`
   justify-content: space-between;
 `;
 
-export const FormInput = styled.TextInput`
+export const FormInput = styled(TextInput)`
   height: ${RFValue(40)}px;
   width: ${RFValue(200)}px;
   padding-horizontal: ${RFValue(10)}px;
@@ -39,4 +40,12 @@ export const LoginButton = styled.TouchableOpacity`
   width: ${RFValue(200)}px;
   height: ${RFValue(30)}px;
   background-color: ${({ theme }) => theme.colors.secondary};
+`;
+
+export const Error = styled.Text`
+  font-size: ${RFValue(14)}px;
+  font-family: ${({ theme }) => theme.fonts.regular};
+  color: ${({ theme }) => theme.colors.attention};
+
+  margin: 7px;
 `;
