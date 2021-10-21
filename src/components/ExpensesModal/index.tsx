@@ -1,15 +1,19 @@
 // Libs
 import moment from "moment";
-import React, { useEffect, useState } from "react";
+import React, { useEffect } from "react";
+import { useForm } from "react-hook-form";
 import { Button } from "react-native";
 import Modal from "react-native-modal";
+import * as Yup from "yup";
+import { yupResolver } from "@hookform/resolvers/yup";
 
 // Api
 import api from "../../services/api";
 import { ExpenseType } from "../../types/expense.types";
+import { InputForm } from "../InputForm";
 
 // Styles
-import { ButtonsContainer, Container, Input, Title } from "./styles";
+import { ButtonsContainer, Container, Title } from "./styles";
 
 interface ExpensesModalProps {
   toggleModal: () => void;
@@ -19,6 +23,22 @@ interface ExpensesModalProps {
   resetDashboardExpenses: () => void;
 }
 
+interface FormData {
+  date: string;
+  description?: string;
+  value: number;
+  observation?: string;
+}
+
+const schema = Yup.object().shape({
+  description: Yup.string(),
+  value: Yup.number()
+    .required("Por favor digite um valor")
+    .positive("Digite um valor positivo"),
+  observation: Yup.string(),
+  date: Yup.string().required("Por favor digite uma data válida"),
+});
+
 export function ExpensesModal({
   toggleModal,
   isVisible,
@@ -26,30 +46,45 @@ export function ExpensesModal({
   setSelectedItem,
   resetDashboardExpenses,
 }: ExpensesModalProps) {
-  const [description, setDescription] = useState("");
-  const [expenseValue, setExpenseValue] = useState("");
-  const [expenseDate, setExpenseDate] = useState(
-    moment(new Date()).format("DD/MM/YYYY")
-  );
-  const [observation, setObservation] = useState<string | undefined>("");
+  const {
+    control,
+    handleSubmit,
+    register,
+    setValue,
+    reset,
+    formState: { errors },
+  } = useForm<FormData>({
+    resolver: yupResolver(schema),
+    defaultValues: {
+      description: "",
+      value: 0,
+      date: moment(new Date()).format("DD/MM/YYYY"),
+      observation: "",
+    },
+  });
 
   function setFields() {
-    setDescription(selectedItem.item);
-    setExpenseValue(selectedItem.value.toString());
-    setExpenseDate(moment(new Date(selectedItem.date)).format("DD/MM/YYYY"));
-    setObservation(selectedItem.additionalInfo.observation);
+    setValue("description", selectedItem.item);
+    setValue("value", selectedItem.value);
+    setValue("date", moment(new Date(selectedItem.date)).format("DD/MM/YYYY"));
+    setValue("observation", selectedItem.additionalInfo.observation);
   }
 
   useEffect(() => {
     if (!!selectedItem) setFields();
   }, [selectedItem]);
 
-  async function handleSubmit() {
+  async function handleRegister({
+    date,
+    description,
+    value,
+    observation,
+  }: FormData) {
     try {
       const data = {
-        date: expenseDate.split("/").reverse().join("-"),
+        date: date.split("/").reverse().join("-"),
         item: description,
-        value: parseFloat(expenseValue),
+        value: value,
         additionalInfo: {
           observation,
         },
@@ -63,58 +98,60 @@ export function ExpensesModal({
 
       resetDashboardExpenses();
 
-      await clearAllField();
+      setSelectedItem(null);
+      reset();
       toggleModal();
     } catch (error) {
       console.log(error);
     }
   }
 
-  function clearAllField() {
-    setSelectedItem(null);
-    setDescription("");
-    setExpenseValue("");
-    setExpenseDate(moment(new Date()).format("DD/MM/YYYY"));
-    setObservation("");
-  }
-
   return (
     <Modal isVisible={isVisible}>
       <Container>
         <Title>{selectedItem ? "Editar" : "Adicionar"} despesa</Title>
-        <Input
+        <InputForm
+          name="description"
+          control={control}
           placeholder="Descrição"
-          value={description}
-          onChangeText={setDescription}
+          innerRef={register}
+          error={errors.description && errors.description.message}
         />
-        <Input
+        <InputForm
+          name="value"
+          control={control}
           placeholder="Valor"
           keyboardType="numeric"
-          value={expenseValue}
-          onChangeText={setExpenseValue}
+          innerRef={register}
+          error={errors.value && errors.value.message}
         />
-        <Input
+        <InputForm
+          name="date"
+          control={control}
           placeholder="Data"
           keyboardType="numeric"
-          value={expenseDate}
-          onChangeText={setExpenseDate}
+          innerRef={register}
+          error={errors.date && errors.date.message}
         />
-        <Input
+        <InputForm
+          name="observation"
+          control={control}
           placeholder="Observação"
-          value={observation}
-          onChangeText={setObservation}
+          innerRef={register}
+          error={errors.observation && errors.observation.message}
         />
 
         <ButtonsContainer>
           <Button
             title={`${selectedItem ? "Atualizar" : "Lançar"} Despesa`}
-            onPress={handleSubmit}
+            onPress={handleSubmit(handleRegister)}
             color="#12a454"
           />
           <Button
             title="Cancelar"
             onPress={async () => {
-              await clearAllField();
+              setSelectedItem(null);
+              reset();
               toggleModal();
             }}
             color="#e83f5b"

@@ -18,14 +18,6 @@ export const Title = styled.Text`
   margin-bottom: 10px;
 `;
 
-export const Input = styled.TextInput`
-  width: 60%;
-  font-size: ${RFValue(18)}px;
-  border-bottom-width: 2px;
-  border-bottom-color: ${({ theme }) => theme.colors.background};
-  margin-bottom: 5px;
-`;
-
 export const ButtonsContainer = styled.View`
   height: ${RFValue(100)}px;
   justify-content: space-around;
