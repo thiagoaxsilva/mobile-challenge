@@ -42,6 +42,11 @@ export const LoginButton = styled.TouchableOpacity`
   background-color: ${({ theme }) => theme.colors.secondary};
 `;
 
+export const LoginText = styled.Text`
+  font-family: ${({ theme }) => theme.fonts.regular};
+  color: ${({ theme }) => theme.colors.title};
+`;
+
 export const Error = styled.Text`
   font-size: ${RFValue(14)}px;
   font-family: ${({ theme }) => theme.fonts.regular};

@@ -1,5 +1,6 @@
 // Libs
 import React, { useEffect, useState } from "react";
+import LottieView from "lottie-react-native";
 
 // Styles
 import { FlatList, View } from "react-native";
@@ -84,23 +85,33 @@ export function Dashboard() {
       <View>
         <ListText>Lista de despesas</ListText>
         <ExpensesContainer>
-          <FlatList
-            data={expenses}
-            showsVerticalScrollIndicator={false}
-            keyExtractor={(item) => item._id}
-            renderItem={({ item }) => (
-              <ExpenseCard
-                item={item}
-                handleEdit={handleEdit}
-                resetDashboardExpenses={resetDashboardExpenses}
-              />
-            )}
-            onEndReached={
-              expenses.length >= 10 ? () => setPage(page + 1) : undefined
-            }
-            onEndReachedThreshold={expenses.length >= 10 ? 0.2 : undefined}
-            contentContainerStyle={{ paddingBottom: 300 }}
-          />
+          {expenses.length < 1 ? (
+            <LottieView
+              source={require("../../assets/loading.json")}
+              resizeMode="contain"
+              loop
+              autoPlay={true}
+              style={{ width: 100 }}
+            />
+          ) : (
+            <FlatList
+              data={expenses}
+              showsVerticalScrollIndicator={false}
+              keyExtractor={(item) => item._id}
+              renderItem={({ item }) => (
+                <ExpenseCard
+                  item={item}
+                  handleEdit={handleEdit}
+                  resetDashboardExpenses={resetDashboardExpenses}
+                />
+              )}
+              onEndReached={
+                expenses.length >= 10 ? () => setPage(page + 1) : undefined
+              }
+              onEndReachedThreshold={expenses.length >= 10 ? 0.2 : undefined}
+              contentContainerStyle={{ paddingBottom: 300 }}
+            />
+          )}
         </ExpensesContainer>
       </View>
       <ExpensesModal

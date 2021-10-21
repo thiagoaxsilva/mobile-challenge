@@ -1,11 +1,12 @@
 // Libs
 import moment from "moment";
-import React, { useEffect } from "react";
+import React, { useEffect, useState } from "react";
 import { useForm } from "react-hook-form";
 import { Button } from "react-native";
 import Modal from "react-native-modal";
 import * as Yup from "yup";
 import { yupResolver } from "@hookform/resolvers/yup";
+import LottieView from "lottie-react-native";
 
 // Api
 import api from "../../services/api";
@@ -26,7 +27,7 @@ interface ExpensesModalProps {
 interface FormData {
   date: string;
   description?: string;
-  value: number;
+  value: string;
   observation?: string;
 }
 
@@ -46,6 +47,7 @@ export function ExpensesModal({
   setSelectedItem,
   resetDashboardExpenses,
 }: ExpensesModalProps) {
+  const [loading, setLoading] = useState(false);
   const {
     control,
     handleSubmit,
@@ -57,7 +59,7 @@ export function ExpensesModal({
     resolver: yupResolver(schema),
     defaultValues: {
       description: "",
-      value: 0,
+      value: "",
       date: moment(new Date()).format("DD/MM/YYYY"),
       observation: "",
     },
@@ -65,7 +67,7 @@ export function ExpensesModal({
 
   function setFields() {
     setValue("description", selectedItem.item);
-    setValue("value", selectedItem.value);
+    setValue("value", selectedItem.value.toString());
     setValue("date", moment(new Date(selectedItem.date)).format("DD/MM/YYYY"));
     setValue("observation", selectedItem.additionalInfo.observation);
   }
@@ -80,11 +82,12 @@ export function ExpensesModal({
     value,
     observation,
   }: FormData) {
+    setLoading(true);
     try {
       const data = {
         date: date.split("/").reverse().join("-"),
         item: description,
-        value: value,
+        value: parseFloat(value),
         additionalInfo: {
           observation,
         },
@@ -100,8 +103,10 @@ export function ExpensesModal({
 
       setSelectedItem(null);
       reset();
+      setLoading(false);
       toggleModal();
     } catch (error) {
+      setLoading(false);
       console.log(error);
     }
   }
@@ -142,20 +147,32 @@ export function ExpensesModal({
         />
 
         <ButtonsContainer>
-          <Button
-            title={`${selectedItem ? "Atualizar" : "Lançar"} Despesa`}
-            onPress={handleSubmit(handleRegister)}
-            color="#12a454"
-          />
-          <Button
-            title="Cancelar"
-            onPress={async () => {
-              setSelectedItem(null);
-              reset();
-              toggleModal();
-            }}
-            color="#e83f5b"
-          />
+          {loading ? (
+            <LottieView
+              source={require("../../assets/loading.json")}
+              resizeMode="contain"
+              loop
+              autoPlay={true}
+              style={{ width: 100 }}
+            />
+          ) : (
+            <>
+              <Button
+                title={`${selectedItem ? "Atualizar" : "Lançar"} Despesa`}
+                onPress={handleSubmit(handleRegister)}
+                color="#12a454"
+              />
+              <Button
+                title="Cancelar"
+                onPress={async () => {
+                  setSelectedItem(null);
+                  reset();
+                  toggleModal();
+                }}
+                color="#e83f5b"
+              />
+            </>
+          )}
         </ButtonsContainer>
       </Container>
     </Modal>

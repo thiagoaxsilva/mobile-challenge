@@ -1,8 +1,8 @@
 // Libs
 import { yupResolver } from "@hookform/resolvers/yup";
-import React, { useState, useContext } from "react";
+import React, { useState, useContext, useEffect } from "react";
+import LottieView from "lottie-react-native";
 import { Controller, useForm } from "react-hook-form";
-import { Text } from "react-native";
 import * as Yup from "yup";
 
 // Context
@@ -16,6 +16,7 @@ import {
   FormInput,
   LoginButton,
   LoginForm,
+  LoginText,
 } from "./styles";
 
 interface FormData {
@@ -29,6 +30,8 @@ const schema = Yup.object().shape({
 });
 
 export function Login() {
+  const [loading, setLoading] = useState(false);
+
   const {
     control,
     handleSubmit,
@@ -42,8 +45,13 @@ export function Login() {
   const { signIn } = useContext(AuthContext);
 
   function onSubmit({ email }: FormData) {
+    setLoading(true);
     signIn(email);
   }
+
+  useEffect(() => {
+    setLoading(false);
+  }, []);
 
   return (
     <Container>
@@ -63,9 +71,19 @@ export function Login() {
             name="email"
           />
           {errors.email && <Error>{errors.email.message}</Error>}
-          <LoginButton onPress={handleSubmit(onSubmit)}>
-            <Text>Logar</Text>
-          </LoginButton>
+          {loading ? (
+            <LottieView
+              source={require("../../assets/loading.json")}
+              resizeMode="contain"
+              loop
+              autoPlay={true}
+              style={{ width: 100 }}
+            />
+          ) : (
+            <LoginButton onPress={handleSubmit(onSubmit)}>
+              <LoginText>Logar</LoginText>
+            </LoginButton>
+          )}
         </LoginForm>
       </FormContainer>
     </Container>
